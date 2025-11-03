@@ -6,22 +6,25 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("== 명언 앱 ==");
+        System.out.println("== Quote app ==");
         Scanner sc = new Scanner(System.in);
 
+        int num = 1;
+
         while(true) {
-            System.out.print("명령) ");
+            System.out.print("command) ");
             String cmd = sc.nextLine();
 
-            if (cmd.equals("종료")) {
+            if (cmd.equals("exit")) {
                 break;
             }
 
-            if (cmd.equals("등록")) {
-                System.out.print("명언 : ");
+            if (cmd.equals("register")) {
+                System.out.print("context : ");
                 String content = sc.nextLine();
-                System.out.print("작가 : ");
+                System.out.print("author : ");
                 String author = sc.nextLine();
+                System.out.println("Quote number" + num + " registered.");
             }
         }
     }

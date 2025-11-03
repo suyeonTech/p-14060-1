@@ -1,14 +1,14 @@
 package com.back;
 
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("== Quote app ==");
         Scanner sc = new Scanner(System.in);
+        String folderName = "src/main/java/com/back/db/wiseSaying";
+        File folder = new File(folderName);
 
         ArrayList<String[]> quotes = new ArrayList<>();
 
@@ -22,50 +22,108 @@ public class Main {
                 break;
             }
 
-            if (cmd.equals("register")) {
+            else if (cmd.equals("register")) {
                 System.out.print("content : ");
                 String content = sc.nextLine();
                 System.out.print("author : ");
                 String author = sc.nextLine();
 
-                quotes.add(new String[]{Integer.toString(num), author, content});
+
+                String json = "{\n" +
+                        " \"id\": " + num + ",\n" +
+                        "  \"content\": \"" + content + "\",\n" +
+                        "  \"author\": \"" + author + "\"\n" +
+                        "}";
+
+                try (FileWriter writer = new FileWriter(folderName + "/" + num + ".json")) {
+                    writer.write(json);
+                }
+
+                try (FileWriter writer = new FileWriter(folderName + "/lastId.txt")) {
+                    writer.write(Integer.toString(num));
+                }
                 System.out.println("Quote number" + num + " registered.");
                 num++;
             }
 
-            if (cmd.equals("list")) {
+            else if (cmd.equals("list")) {
                 System.out.println("----------------------");
-                for (String[] quote : quotes) {
-                    System.out.println(quote[0] + " / " + quote[1] + " / " + quote[2]);
+
+                File[] files = folder.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (!file.getName().equals("lastId.txt")){
+                            Quote quote = getQuote(file);
+                            System.out.println(quote.id + " / " + quote.author + " / " + quote.content);
+                        }
+                    }
                 }
             }
 
-            if (cmd.startsWith("delete")) {
+            else if (cmd.startsWith("delete")) {
                 String what = cmd.substring(cmd.indexOf("=") + 1);
-                boolean removed = quotes.removeIf(arr -> what.equals(arr[0]));
-
-                if (removed) {
-                    System.out.println("Quote number " + what + " removed.");
+                File file = new File(folderName + "/" + what + ".json");
+                if (file.exists()) {
+                    file.delete();
                 } else {
                     System.out.println("No such quote number: " + what);
                 }
             }
 
-            if (cmd.startsWith("modify")) {
+            else if (cmd.startsWith("modify")) {
                 String what = cmd.substring(cmd.indexOf("=") + 1);
-                for (String[] quote : quotes) {
-                    if (what.equals(quote[0])) {
-                        System.out.println("content(before) : " + quote[2]);
-                        System.out.print("content : ");
-                        String content = sc.nextLine();
-                        System.out.println("author(before) : " + quote[1]);
-                        System.out.print("author : ");
-                        String author = sc.nextLine();
-                        quote[1] = author;
-                        quote[2] = content;
+                File file = new File(folderName + "/" + what + ".json");
+                if (file.exists()) {
+                    Quote quote = getQuote(file);
+                    System.out.println("content(before) : " + quote.content);
+                    System.out.print("content : ");
+                    String content = sc.nextLine();
+                    System.out.println("author(before) : " + quote.author);
+                    System.out.print("author : ");
+                    String author = sc.nextLine();
+
+                    String json = "{\n" +
+                            " \"id\": " + what + ",\n" +
+                            "  \"content\": \"" + content + "\",\n" +
+                            "  \"author\": \"" + author + "\"\n" +
+                            "}";
+                    try (FileWriter writer = new FileWriter(folderName + "/" + what + ".json")) {
+                        writer.write(json);
                     }
+
+                } else {
+                    System.out.println("No such quote number: " + what);
                 }
             }
         }
+
+
+    }
+
+    public static Quote getQuote(File file) {
+        String line;
+        String content = "";
+        String author = "";
+        String id = "";
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("\"content\":")) {
+                    content = line.split(":")[1].trim();
+                    content = content.substring(1, content.length() - 2);
+                } else if (line.startsWith("\"author\":")) {
+                    author = line.split(":")[1].trim();
+                    author = author.substring(1, author.length() - 1);
+                } else if (line.startsWith("\"id\":")) {
+                    id = line.split(":")[1].trim();
+                    id = id.substring(0, id.length() - 1);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new Quote(Integer.parseInt(id), content, author);
     }
 }

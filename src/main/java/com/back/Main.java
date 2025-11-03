@@ -41,10 +41,14 @@ public class Main {
             }
 
             if (cmd.startsWith("delete")) {
-                int index2 = cmd.indexOf("=");
-                String what = cmd.substring(index2 + 1);
-                quotes.removeIf(arr -> what.equals(arr[0]));
-                System.out.println("Quote number" + what + " deleted.");
+                String what = cmd.substring(cmd.indexOf("=") + 1);
+                boolean removed = quotes.removeIf(arr -> what.equals(arr[0]));
+
+                if (removed) {
+                    System.out.println("Quote number " + what + " removed.");
+                } else {
+                    System.out.println("No such quote number: " + what);
+                }
             }
         }
     }

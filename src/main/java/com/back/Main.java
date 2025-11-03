@@ -50,6 +50,22 @@ public class Main {
                     System.out.println("No such quote number: " + what);
                 }
             }
+
+            if (cmd.startsWith("modify")) {
+                String what = cmd.substring(cmd.indexOf("=") + 1);
+                for (String[] quote : quotes) {
+                    if (what.equals(quote[0])) {
+                        System.out.println("content(before) : " + quote[2]);
+                        System.out.print("content : ");
+                        String content = sc.nextLine();
+                        System.out.println("author(before) : " + quote[1]);
+                        System.out.print("author : ");
+                        String author = sc.nextLine();
+                        quote[1] = author;
+                        quote[2] = content;
+                    }
+                }
+            }
         }
     }
 }

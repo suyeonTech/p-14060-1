@@ -10,8 +10,6 @@ public class Main {
         String folderName = "src/main/java/com/back/db/wiseSaying";
         File folder = new File(folderName);
 
-        ArrayList<String[]> quotes = new ArrayList<>();
-
         int num = 1;
 
         while(true) {
@@ -28,15 +26,10 @@ public class Main {
                 System.out.print("author : ");
                 String author = sc.nextLine();
 
-
-                String json = "{\n" +
-                        " \"id\": " + num + ",\n" +
-                        "  \"content\": \"" + content + "\",\n" +
-                        "  \"author\": \"" + author + "\"\n" +
-                        "}";
+                Quote quote = new Quote(num, content, author);
 
                 try (FileWriter writer = new FileWriter(folderName + "/" + num + ".json")) {
-                    writer.write(json);
+                    writer.write(makeJson(quote));
                 }
 
                 try (FileWriter writer = new FileWriter(folderName + "/lastId.txt")) {
@@ -52,7 +45,7 @@ public class Main {
                 File[] files = folder.listFiles();
                 if (files != null) {
                     for (File file : files) {
-                        if (!file.getName().equals("lastId.txt")){
+                        if (isDataFile(file.getName())) {
                             Quote quote = getQuote(file);
                             System.out.println(quote.id + " / " + quote.author + " / " + quote.content);
                         }
@@ -82,22 +75,45 @@ public class Main {
                     System.out.print("author : ");
                     String author = sc.nextLine();
 
-                    String json = "{\n" +
-                            " \"id\": " + what + ",\n" +
-                            "  \"content\": \"" + content + "\",\n" +
-                            "  \"author\": \"" + author + "\"\n" +
-                            "}";
+                    quote = new Quote(Integer.parseInt(what), content, author);
                     try (FileWriter writer = new FileWriter(folderName + "/" + what + ".json")) {
-                        writer.write(json);
+                        writer.write(makeJson(quote));
                     }
 
                 } else {
                     System.out.println("No such quote number: " + what);
                 }
             }
+
+            else if (cmd.equals("build")) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("[\n");
+
+                File[] files = folder.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (isDataFile(file.getName())) {
+                            Quote quote = getQuote(file);
+                            if (sb.charAt(sb.length() - 1) == '}') {
+                                sb.append(",");
+                            }
+                            sb.append(makeJson(quote));
+                        }
+                    }
+                }
+                sb.append("]");
+                try (FileWriter writer = new FileWriter(folderName + "/data.json")) {
+                    writer.write(sb.toString());
+                }
+            }
+
         }
 
 
+    }
+
+    public static boolean isDataFile(String name) {
+        return !name.equals("lastId.txt") && !name.equals("data.json");
     }
 
     public static Quote getQuote(File file) {
@@ -125,5 +141,13 @@ public class Main {
         }
 
         return new Quote(Integer.parseInt(id), content, author);
+    }
+
+    public static String makeJson(Quote quote) {
+        return "{\n" +
+                " \"id\": " + quote.id + ",\n" +
+                "  \"content\": \"" + quote.content + "\",\n" +
+                "  \"author\": \"" + quote.author + "\"\n" +
+                "}";
     }
 }

@@ -10,8 +10,6 @@ public class Main {
         String folderName = "src/main/java/com/back/db/wiseSaying";
         File folder = new File(folderName);
 
-        int num = 1;
-
         while(true) {
             System.out.print("command) ");
             String cmd = sc.nextLine();
@@ -25,6 +23,16 @@ public class Main {
                 String content = sc.nextLine();
                 System.out.print("author : ");
                 String author = sc.nextLine();
+
+                int num;
+
+                File lastFile = new File(folderName + "/lastId.txt");
+                if (lastFile.exists()) {
+                    try (BufferedReader reader = new BufferedReader(new FileReader(lastFile))) {
+                        String line = reader.readLine();
+                        num = Integer.parseInt(line) + 1;
+                    }
+                } else num = 1;
 
                 Quote quote = new Quote(num, content, author);
 

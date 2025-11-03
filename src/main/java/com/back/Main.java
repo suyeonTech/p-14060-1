@@ -25,6 +25,7 @@ public class Main {
                 System.out.print("author : ");
                 String author = sc.nextLine();
                 System.out.println("Quote number" + num + " registered.");
+                num++;
             }
         }
     }

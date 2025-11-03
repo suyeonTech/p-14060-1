@@ -16,6 +16,13 @@ public class Main {
             if (cmd.equals("종료")) {
                 break;
             }
+
+            if (cmd.equals("등록")) {
+                System.out.print("명언 : ");
+                String content = sc.nextLine();
+                System.out.print("작가 : ");
+                String author = sc.nextLine();
+            }
         }
     }
 }
